@@ -1,0 +1,26 @@
+name: Keep Spaces Alive
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # 每 12 小时
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        space:
+          - https://huggingface.co/spaces/Hi-Kung/rag-document-qa
+          - https://huggingface.co/spaces/Hi-Kung/history_debate
+          - https://huggingface.co/spaces/Hi-Kung/Historical-Figure-Analysis
+    
+    steps:
+      - name: Ping ${{ matrix.space }}
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "${{ matrix.space }}")
+          if [ "$response" = "200" ] || [ "$response" = "503" ]; then
+            echo "✅ Space responded with $response (503 is OK for waking up)"
+          else
+            echo "⚠️ Unexpected response: $response"
+          fi
